@@ -46,7 +46,7 @@ Tier video loading by role, compress WebGL assets and pick a quality tier before
 
 ## Reusing demos and component libraries
 
-Demo collections and component libraries (a local library the user points to, a vendor catalog, code sandboxes) usually share one placeholder look: often a dark ground, one saturated accent, a mono tracked-uppercase eyebrow and oversized headings. A demo's appearance is placeholder, not a suggestion.
+Demo collections and component libraries (a local library the user points to, a vendor catalog, code sandboxes) usually share one placeholder look: often a dark ground, one saturated accent, a mono tracked-uppercase eyebrow and oversized headings. A demo's appearance is placeholder, not a suggestion. This skill's own [motion kit](../assets/motion/README.md) follows the same rule: its pages use plain fixture styling, and its tuned values are starting points from two shipped sites, not standards.
 
 - Import the mechanism: timeline structure, state machine, lifecycle, input handling. Do not import the demo's base stylesheet, its tokens, its eyebrow/heading/button shells, placeholder copy or stock images.
 - Restyle with project tokens before judging fit. If an effect only works in the demo palette, redesign or reject it.

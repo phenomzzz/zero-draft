@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion kit | zero-draft</title>
+<style>
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  main { max-width: 980px; margin: 0 auto; padding: 56px 24px 80px; }
+  h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.05; margin: 0 0 12px; }
+  .lead { color: var(--muted); max-width: 64ch; margin: 0 0 32px; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li { border-bottom: 1px solid var(--line); }
+  li a { display: grid; grid-template-columns: minmax(0, 14rem) minmax(0, 1fr); gap: 6px 24px; padding: 18px 4px; text-decoration: none; color: inherit; }
+  li a:hover b { text-decoration: underline; }
+  b { font-weight: 650; }
+  li span { color: var(--muted); }
+  small { display: block; grid-column: 2; color: var(--muted); font-size: 13px; }
+  .credit { color: var(--muted); max-width: 64ch; margin-top: 32px; font-size: 15px; }
+  @media (max-width: 640px) { li a { grid-template-columns: 1fr; } small { grid-column: 1; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Motion kit</h1>
+  <p class="lead">Nine motion components as single HTML files, with the values they shipped with in two production websites. Copy the mechanism, restyle it with your own tokens. Add <code>?motion=reduce</code> to any page to see its reduced-motion behaviour.</p>
+  <ul>
+    <li><a href="magnetic.html"><b>Magnetic button</b><span>Button and label lean toward the pointer, spring back on leave.</span><small>Base: magnetic-button</small></a></li>
+    <li><a href="filter-grid.html"><b>Filter grid</b><span>Flip reflow, cards join a beat later, sliding filter highlight, counting total.</span><small>Base: flip-filter</small></a></li>
+    <li><a href="side-sheet.html"><b>Side sheet</b><span>Detail panel with dim, staged content, previous/next, scroll lock and focus return.</span><small>Base: detail-drawer</small></a></li>
+    <li><a href="pinned-steps.html"><b>Pinned steps</b><span>Scroll-driven steps with snap, hysteresis, a scrubbed indicator and directional photo wipes.</span><small>Base for the wipe: step-wipe; pinning is our own</small></a></li>
+    <li><a href="split-reveal.html"><b>Split reveal</b><span>Characters gather from the centre on scroll; lines rise in masks once.</span><small>Base: character-appear, text-reveal</small></a></li>
+    <li><a href="opening-frame.html"><b>Opening frame</b><span>A rounded window opens to full screen while the headline parts around it.</span><small>Base: capsule-hero</small></a></li>
+    <li><a href="scroll-header.html"><b>Scroll header</b><span>Leaves on scroll down, returns on scroll up, follows the band beneath it.</span><small>Base: hide-header</small></a></li>
+    <li><a href="fullscreen-menu.html"><b>Fullscreen menu</b><span>Reversible curtain timeline, rows that fill from the entry edge, wiping preview.</span><small>Base: fullscreen-slide-menu, hoverable-list</small></a></li>
+    <li><a href="panel-strip.html"><b>Panel strip</b><span>Panels widen by distance from the one in view; viewing never chooses.</span><small>Base: expanding-strip</small></a></li>
+  </ul>
+  <p class="credit">“Base” names are components in the annnimate catalog (annnimate.com). Every file here is a from-scratch recreation, written without annnimate’s code, markup, styles or media, then adapted and tuned in our own sites. annnimate is not affiliated with this kit. See README.md in this folder.</p>
+</main>
+</body>
+</html>

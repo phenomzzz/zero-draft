@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pinned steps | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+  .spacer { min-height: 70vh; display: grid; place-items: center; color: var(--muted); }
+
+  .steps { min-height: 100vh; display: grid; align-items: center; padding: 6vh 5vw; background: var(--ground); }
+  .steps-stage { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 5vw; align-items: center; max-width: 1280px; margin: 0 auto; width: 100%; }
+  .tabs { position: relative; display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .tab { position: relative; z-index: 1; border: 0; background: none; padding: 10px 18px; border-radius: 999px; cursor: pointer; transition: color .3s; }
+  .tab[aria-selected="true"] { color: var(--ground); }
+  .tab-hl { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 999px; background: var(--ink); }
+  .count { margin: 28px 0 8px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .count-mask { display: inline-block; overflow: clip; vertical-align: bottom; }
+  .count-mask span { display: inline-block; }
+  .copy { font-size: clamp(22px, 2.4vw, 32px); line-height: 1.25; margin: 0; max-width: 22ch; min-height: 3.8em; }
+  /* The rounded container is a stable mask that never transforms; the layers move inside it. */
+  .media { position: relative; margin: 0; }
+  .layers { position: relative; aspect-ratio: 4 / 5; max-height: 76vh; border-radius: 40vw 40vw 18px 18px / 22vw 22vw 18px 18px; overflow: hidden; background: #cfcac0; margin-left: auto; }
+  .layer { position: absolute; inset: 0; overflow: hidden; }
+  /* Each image is 8% oversized so its drift stays inside the crop. */
+  .layer img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; }
+  .caption { margin: 12px 0 0; color: var(--muted); text-align: right; }
+  @media (max-width: 760px) {
+    .steps-stage { grid-template-columns: 1fr; }
+    .layers { aspect-ratio: 4 / 3; border-radius: 40vw 40vw 14px 14px / 18vw 18vw 14px 14px; }
+    .copy { min-height: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Pinned steps</h1>
+  <p>The section pins while the visitor scrolls through three steps. Scroll position picks the step, with a little hysteresis so it does not flicker at a boundary, and snaps to the nearest step. The indicator follows scroll continuously. Each change wipes the new photo in from the direction of travel while the old one drifts and dims, and the copy, caption and counter change on the same beat. Clicking a tab wins over scroll until the visitor arrives or scrolls again.</p>
+  <p>Base component for the photo change: step-wipe (annnimate catalog), recreated from scratch. The pinning, snap, hysteresis and indicator are our own. Values from both builds. <a href="index.html">All components</a></p>
+</header>
+<div class="spacer">Scroll down</div>
+<section class="steps" aria-label="A day in three parts">
+  <div class="steps-stage">
+    <div>
+      <div class="tabs" role="tablist" aria-label="Part of the day">
+        <span class="tab-hl" aria-hidden="true"></span>
+      </div>
+      <p class="count"><span class="count-mask"><span data-count>01</span></span> / 03</p>
+      <p class="copy" data-copy></p>
+    </div>
+    <figure class="media" role="tabpanel" id="steps-panel">
+      <div class="layers" data-layers></div>
+      <figcaption class="caption" data-caption></figcaption>
+    </figure>
+  </div>
+</section>
+<div class="spacer">End of the pinned section</div>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
+<script>
+(() => {
+  gsap.registerPlugin(ScrollTrigger);
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const REDUCED = rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const img = (seed, w, h) => `https://picsum.photos/seed/zd-${seed}/${w}/${h}`;
+
+  const STEPS = [
+    { title: 'Morning', copy: 'Coffee on the porch before the valley clears.', caption: 'Morning, from the east window' },
+    { title: 'Afternoon', copy: 'A long walk down to the river and back.', caption: 'Afternoon, river path' },
+    { title: 'Evening', copy: 'Dinner outside while the light goes amber.', caption: 'Evening, the long table' }
+  ];
+  const N = STEPS.length;
+  const CFG = {
+    stepLength: .8,      // viewport heights of scroll per step (community build)
+    snap: { snapTo: 1 / (N - 1), duration: { min: .25, max: .6 }, delay: .08, ease: 'power2.inOut' },
+    hysteresis: .03,     // progress past a boundary before the step changes (booking build)
+    explicitHoldMs: 1600,
+    unpin: '(max-width: 760px), (max-height: 600px)'   // below this the tabs drive the steps
+  };
+  const umq = matchMedia(CFG.unpin), UNPIN = umq.matches;
+  // Pinned layouts are measured once; crossing a breakpoint or the motion setting reloads (as shipped).
+  rmq.addEventListener('change', () => location.reload());
+  umq.addEventListener('change', () => location.reload());
+
+  const tabWrap = $('.tabs'), hl = $('.tab-hl'), copy = $('[data-copy]'), caption = $('[data-caption]'), count = $('[data-count]');
+  const panel = $('#steps-panel');
+  tabWrap.insertAdjacentHTML('beforeend', STEPS.map((s, i) => `<button class="tab" type="button" role="tab" id="step-tab-${i}" aria-controls="steps-panel" aria-selected="false" tabindex="-1">${s.title}</button>`).join(''));
+  // Every layer loads up front (later ones at low priority) and is decoded at idle: a lazy image that
+  // stays hidden until its wipe starts would only begin loading mid-transition and wipe in blank.
+  $('[data-layers]').innerHTML = STEPS.map((s, i) => `<div class="layer"><img src="${img('day' + i, 1000, 1250)}" alt="${s.caption}" decoding="async"${i ? ' fetchpriority="low"' : ''}></div>`).join('');
+  const tabs = $$('.tab'), layers = $$('.layer');
+  (window.requestIdleCallback || (fn => setTimeout(fn, 300)))(() => layers.forEach(l => l.firstElementChild.decode?.().catch(() => {})), { timeout: 3000 });
+
+  /* Indicator: interpolates position and width between neighbouring tabs. */
+  let G = [];
+  const geo = () => { G = tabs.map(t => [t.offsetLeft, t.offsetWidth]); };
+  function placeHl(x) {
+    const i = Math.max(0, Math.min(N - 1, x)), a = Math.floor(i), b = Math.min(N - 1, a + 1), u = i - a;
+    gsap.set(hl, { x: G[a][0] + (G[b][0] - G[a][0]) * u, width: G[a][1] + (G[b][1] - G[a][1]) * u });
+  }
+  const moveHl = (k, instant) => gsap.to(hl, { x: G[k][0], width: G[k][1], duration: instant || REDUCED ? 0 : .6, ease: 'expo.out', overwrite: true });
+
+  /* Counter: the old value rolls up and out, the new one rolls in from below. */
+  function roll(node, text, instant) {
+    if (REDUCED || instant || node.textContent === text) { node.textContent = text; return; }
+    gsap.killTweensOf(node);
+    gsap.timeline().to(node, { yPercent: -40, opacity: 0, duration: .18, ease: 'power2.in', onComplete: () => { node.textContent = text; } })
+      .fromTo(node, { yPercent: 40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .5, ease: 'expo.out' });
+  }
+
+  /* Step change: incoming layer wipes in from the direction of travel; outgoing drifts and dims. */
+  let cur = -1, tl = null;
+  function setStep(k, { instant = false } = {}) {
+    if (k === cur && !instant) return;
+    const prev = cur, down = prev < 0 || k > prev; cur = k;
+    tabs.forEach((t, i) => { t.setAttribute('aria-selected', String(i === k)); t.tabIndex = i === k ? 0 : -1; });
+    panel.setAttribute('aria-labelledby', tabs[k].id);
+    tl?.kill();
+    const text = () => { copy.textContent = STEPS[k].copy; caption.textContent = STEPS[k].caption; };
+    if (instant || REDUCED) {
+      layers.forEach((l, i) => { l.style.zIndex = i === k ? 2 : 1; gsap.set(l, { clipPath: 'inset(0% 0% 0% 0%)', autoAlpha: i === k ? 1 : 0 }); gsap.set(l.firstElementChild, { yPercent: 0, scale: 1, clearProps: 'filter' }); });
+      text(); roll(count, `0${k + 1}`, true); return;
+    }
+    const inc = layers[k], out = layers[prev];
+    layers.forEach((l, i) => { if (i !== k && i !== prev) gsap.set(l, { autoAlpha: 0 }); l.style.zIndex = i === k ? 3 : i === prev ? 2 : 1; });
+    // At rest no photo keeps a filter, so none stays on its own compositing layer.
+    tl = gsap.timeline({ defaults: { overwrite: 'auto' }, onComplete: () => { layers.forEach((l, i) => { if (i !== k) gsap.set(l, { autoAlpha: 0 }); gsap.set(l.firstElementChild, { clearProps: 'filter' }); }); if (out) gsap.set(out.firstElementChild, { yPercent: 0 }); } })
+      .fromTo(inc, { autoAlpha: 1, clipPath: down ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .95, ease: 'expo.inOut' }, 0)
+      .fromTo(inc.firstElementChild, { yPercent: down ? 3 : -3, scale: 1.06 }, { yPercent: 0, scale: 1, filter: 'brightness(1)', duration: 1.25, ease: 'expo.out' }, 0)
+      .to(copy, { autoAlpha: 0, y: down ? -10 : 10, duration: .2, ease: 'power2.in' }, 0)
+      .to(caption, { autoAlpha: 0, duration: .2 }, 0)
+      .add(text, .22)
+      .fromTo(copy, { y: down ? 16 : -16 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'expo.out' }, .24)
+      .fromTo(caption, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: .6, ease: 'expo.out' }, .55);
+    if (out) tl.to(out.firstElementChild, { yPercent: down ? -3 : 3, filter: 'brightness(.62)', duration: .95, ease: 'expo.inOut' }, 0);
+    roll(count, `0${k + 1}`);
+  }
+
+  /* Scroll picks the nearest step, but only once progress is clearly past the boundary. */
+  function stepFromProgress(p) {
+    const raw = Math.round(p * (N - 1)), c = Math.max(0, cur);
+    if (raw === c) return c;
+    const boundary = (Math.min(raw, c) + .5) / (N - 1);
+    return Math.abs(p - boundary) > CFG.hysteresis ? raw : c;
+  }
+
+  let st = null, explicit = null;
+  geo();
+  if (!REDUCED && !UNPIN) {
+    st = ScrollTrigger.create({
+      trigger: '.steps', start: 'top top', end: () => '+=' + innerHeight * CFG.stepLength * (N - 1),
+      pin: true, anticipatePin: 1, snap: CFG.snap,
+      onUpdate: s => {
+        placeHl(s.progress * (N - 1));
+        if (explicit) { if (performance.now() < explicit.until) return; explicit = null; }
+        setStep(stepFromProgress(s.progress));
+      },
+      onRefresh: geo
+    });
+  }
+  /* A direct choice wins: go to that step's snap point and ignore scroll until arrival or new input. */
+  function go(k, focusTab) {
+    if (focusTab) tabs[k].focus({ preventScroll: true });
+    setStep(k);
+    if (!st) { moveHl(k); return; }
+    explicit = { until: performance.now() + CFG.explicitHoldMs };
+    const release = () => { explicit = null; removeEventListener('wheel', release); removeEventListener('keydown', keyRelease); removeEventListener('touchstart', release); };
+    const keyRelease = e => { if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(e.key) && !e.target.closest('[role="tablist"]')) release(); };
+    addEventListener('wheel', release, { passive: true, once: true }); addEventListener('touchstart', release, { passive: true, once: true }); addEventListener('keydown', keyRelease);
+    addEventListener('scrollend', release, { once: true });
+    scrollTo({ top: st.start + (st.end - st.start) * (k / (N - 1)), behavior: 'smooth' });
+  }
+  tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
+  tabWrap.addEventListener('keydown', e => {
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!d && e.key !== 'Home' && e.key !== 'End') return;
+    e.preventDefault();
+    go(e.key === 'Home' ? 0 : e.key === 'End' ? N - 1 : (cur + d + N) % N, true);
+  });
+  addEventListener('resize', () => { geo(); st ? placeHl(st.progress * (N - 1)) : moveHl(cur, true); });
+  document.fonts?.ready.then(() => { geo(); moveHl(Math.max(0, cur), true); requestAnimationFrame(() => requestAnimationFrame(() => ScrollTrigger.refresh())); });
+  setStep(0, { instant: true }); moveHl(0, true);
+})();
+</script>
+</body>
+</html>

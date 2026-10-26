@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fullscreen menu | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --dark: #1f2a24; --paper: #f3f2ef; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+
+  .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 20px 5vw; }
+  .bar a { font-weight: 700; text-decoration: none; }
+  .pill-btn { border: 1px solid currentColor; background: var(--ground); border-radius: 999px; padding: 10px 20px; cursor: pointer; }
+  main section { min-height: 90vh; padding: 18vh 5vw 8vh; }
+  main section:nth-child(even) { background: #e7e4dd; }
+  main h1, main h2 { font-size: clamp(32px, 5vw, 72px); line-height: 1; margin: 0 0 16px; max-width: 14ch; letter-spacing: -.02em; }
+  main p { max-width: 60ch; color: var(--muted); margin: 0 0 8px; }
+
+  .menu-dialog { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; color: var(--paper); overflow: hidden; }
+  .menu-dialog::backdrop { background: transparent; }
+  .menu-dialog:focus { outline: none; }
+  .menu-curtain { position: absolute; inset: 0; background: var(--dark); }
+  .menu-inner { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding: 20px 5vw 28px; }
+  .menu-top { display: flex; justify-content: space-between; align-items: center; }
+  .menu-close { border: 1px solid rgba(243, 242, 239, .5); background: none; border-radius: 999px; padding: 10px 20px; cursor: pointer; }
+  .menu-body { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 6vw; align-items: center; }
+  .menu-list { display: flex; flex-direction: column; }
+  .menu-row { position: relative; display: grid; grid-template-columns: 3em minmax(0, 1fr) auto; align-items: baseline; gap: 16px; padding: 12px 12px 14px; text-decoration: none; transition: opacity .4s; }
+  .has-hover .menu-row:not(.is-hover) { opacity: .45; }
+  .menu-row-fill { position: absolute; inset: 0; background: rgba(243, 242, 239, .08); transform: scaleY(0); transform-origin: 50% 0%; }
+  .menu-row-index { font-variant-numeric: tabular-nums; opacity: .6; }
+  .menu-row-mask { display: block; overflow: clip; font-size: clamp(30px, 4.6vw, 68px); line-height: 1.1; height: 1.1em; }
+  .menu-roll { display: block; }
+  .menu-roll > span { display: block; height: 1.1em; white-space: nowrap; }
+  .menu-row-note { opacity: .7; font-size: 15px; text-align: right; max-width: 18ch; }
+  .menu-row-here { display: none; font-size: 13px; opacity: .8; }
+  .menu-row.is-current .menu-row-here { display: inline; margin-left: 8px; }
+  .menu-row-rule { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: rgba(243, 242, 239, .22); transform-origin: 0 50%; }
+  .menu-preview { margin: 0; }
+  /* The window's arch is part of its clip-path, so opening it and its final shape are one value. */
+  .menu-window { position: relative; aspect-ratio: 4 / 5; max-height: 62vh; overflow: hidden; clip-path: inset(0% 0% 0% 0% round 50% 50% 0 0 / 22% 22% 0 0); }
+  .menu-window img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .menu-preview figcaption { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: 15px; }
+  .menu-cap-mask { display: inline-block; overflow: clip; }
+  .menu-cap { display: inline-block; }
+  .menu-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; opacity: .75; font-size: 14px; }
+  @media (max-width: 760px) {
+    .menu-body { grid-template-columns: 1fr; align-items: start; padding-top: 4vh; }
+    .menu-preview { display: none; }
+    .menu-row-note { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="bar"><a href="index.html">All components</a><button class="pill-btn menu-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">Menu</button></div>
+<main>
+  <section id="s0"><h1>Fullscreen menu</h1><p>Open the menu. A curtain wipes down while the page behind dims and drifts up, the rows rise into their masks, rules draw and an arched photo window opens. Hovering a row fills it from the edge the pointer came through and swaps the photo with a wipe in the direction of travel. Closing plays the same timeline backwards, faster, then scrolls to the chosen section.</p><p>Base components: fullscreen-slide-menu and hoverable-list (annnimate catalog), recreated from scratch. Values as tuned in the booking build.</p></section>
+  <section id="s1"><h2>Overview</h2><p>First section.</p></section>
+  <section id="s2"><h2>A day here</h2><p>Second section.</p></section>
+  <section id="s3"><h2>Spaces</h2><p>Third section.</p></section>
+  <section id="s4"><h2>Visit</h2><p>Fourth section.</p></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script>
+(() => {
+  const g = window.gsap;
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const img = (seed, w, h) => `https://picsum.photos/seed/zd-${seed}/${w}/${h}`;
+  const ITEMS = [
+    { id: 's1', label: 'Overview', note: 'What the place is', caption: 'A wide view of the site.' },
+    { id: 's2', label: 'A day here', note: 'From morning to night', caption: 'How the hours go.' },
+    { id: 's3', label: 'Spaces', note: 'Rooms and shared areas', caption: 'Inside and out.' },
+    { id: 's4', label: 'Visit', note: 'Directions and booking', caption: 'Plan the trip.' }
+  ];
+  const CFG = {
+    closeSpeed: 1.55,    // closing replays the opening timeline backwards at this time scale
+    drift: -60,          // px the page behind moves while the curtain falls
+    dim: .4              // opacity of the page behind
+  };
+
+  const d = document.createElement('dialog');
+  d.className = 'menu-dialog'; d.tabIndex = -1; d.setAttribute('aria-label', 'Menu');
+  d.innerHTML = `<div class="menu-curtain" aria-hidden="true"></div>
+  <div class="menu-inner">
+    <div class="menu-top"><span>Placeholder</span><button class="menu-close" type="button">Close</button></div>
+    <div class="menu-body">
+      <nav class="menu-list" aria-label="Sections">${ITEMS.map((it, i) => `<a class="menu-row" href="#${it.id}"><span class="menu-row-fill" aria-hidden="true"></span><span class="menu-row-index">0${i + 1}</span><span class="menu-row-mask"><span class="menu-roll"><span>${it.label}<span class="menu-row-here" aria-hidden="true">You are here</span></span><span aria-hidden="true">${it.label}</span></span></span><span class="menu-row-note">${it.note}</span><span class="menu-row-rule" aria-hidden="true"></span></a>`).join('')}</nav>
+      <figure class="menu-preview" aria-hidden="true"><div class="menu-window">${ITEMS.map((it, i) => `<img src="${img('menu' + i, 800, 1000)}" alt="" decoding="async">`).join('')}</div><figcaption><span class="menu-cap-mask"><span class="menu-cap"></span></span><span class="menu-cap-count"></span></figcaption></figure>
+    </div>
+    <div class="menu-foot"><span>Placeholder address, 00 Road Name</span><span>Placeholder hours, 9 am to 6 pm</span></div>
+  </div>`;
+  document.body.append(d);
+  const $ = s => d.querySelector(s), $$ = s => [...d.querySelectorAll(s)];
+  const rows = $$('.menu-row'), imgs = $$('.menu-window img'), triggerBtn = document.querySelector('.menu-trigger');
+  let current = 0, tl = null, navigateTo = null, armed = false, tlSize = '';
+
+  /* Which section is the visitor in? The one nearest the viewport centre; none while still on the opening. */
+  function activeIndex() {
+    if (scrollY < innerHeight * .6) return -1;
+    let best = 0, dist = Infinity;
+    ITEMS.forEach((it, i) => { const r = document.getElementById(it.id).getBoundingClientRect(), mid = innerHeight / 2; const dd = r.top > mid ? r.top - mid : r.bottom < mid ? mid - r.bottom : 0; if (dd < dist) { dist = dd; best = i; } });
+    return best;
+  }
+  /* Preview: the new photo wipes in from the direction of travel through the list; the caption rolls. */
+  function preview(i, instant = false) {
+    if (i === current && !instant) return;
+    const prev = current, dir = i > prev ? 1 : -1; current = i;
+    const cap = $('.menu-cap');
+    $('.menu-cap-count').textContent = `0${i + 1} / 0${ITEMS.length}`;
+    imgs.forEach((im, k) => { im.style.zIndex = k === i ? 3 : k === prev ? 2 : 1; });
+    if (instant || reduced()) { imgs.forEach((im, k) => g.set(im, { autoAlpha: k === i ? 1 : 0, clipPath: 'inset(0% 0% 0% 0%)', scale: 1 })); cap.textContent = ITEMS[i].caption; return; }
+    g.killTweensOf(imgs[i]);
+    g.fromTo(imgs[i], { autoAlpha: 1, clipPath: dir > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)', scale: 1.14 },
+      { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, duration: .8, ease: 'expo.out', onComplete: () => imgs.forEach((im, k) => { if (k !== current) g.set(im, { autoAlpha: 0 }); }) });
+    g.timeline().to(cap, { yPercent: -110 * dir, duration: .2, ease: 'power2.in' }).add(() => { cap.textContent = ITEMS[i].caption; })
+      .fromTo(cap, { yPercent: 110 * dir }, { yPercent: 0, duration: .5, ease: 'expo.out' });
+  }
+  /* Rows: the fill grows from the edge the pointer came through and the label rolls to its copy. */
+  rows.forEach((row, i) => {
+    const fill = row.querySelector('.menu-row-fill'), roll = row.querySelector('.menu-roll');
+    const fromTop = e => !e || e.clientY === undefined ? true : e.clientY - row.getBoundingClientRect().top < row.offsetHeight / 2;
+    const enter = e => {
+      preview(i); row.classList.add('is-hover'); d.classList.add('has-hover');
+      if (reduced()) return;
+      g.set(fill, { transformOrigin: fromTop(e) ? '50% 0%' : '50% 100%' });
+      g.to(fill, { scaleY: 1, duration: .5, ease: 'expo.out', overwrite: true });
+      g.to(roll, { yPercent: -50, duration: .6, ease: 'expo.out', overwrite: true });
+    };
+    const leave = e => {
+      row.classList.remove('is-hover'); if (!rows.some(r => r.classList.contains('is-hover'))) d.classList.remove('has-hover');
+      if (reduced()) return;
+      g.set(fill, { transformOrigin: fromTop(e) ? '50% 0%' : '50% 100%' });
+      g.to(fill, { scaleY: 0, duration: .45, ease: 'expo.out', overwrite: true });
+      g.to(roll, { yPercent: 0, duration: .6, ease: 'expo.out', overwrite: true });
+    };
+    row.addEventListener('pointerenter', enter); row.addEventListener('pointerleave', leave);
+    row.addEventListener('focus', () => enter()); row.addEventListener('blur', () => leave());
+    row.addEventListener('click', e => { e.preventDefault(); navigateTo = '#' + ITEMS[i].id; close(); });
+  });
+
+  /* The page behind dims and drifts through a proxy, so the timeline only touches the menu's own elements. */
+  const fade = { a: 1, y: 0 }, main = document.querySelector('main');
+  function applyPage() {
+    if (!armed) return;
+    main.style.opacity = fade.a; main.style.visibility = fade.a > 0 ? 'inherit' : 'hidden';
+    g.set(main, { y: fade.y });
+  }
+  /* Built once at idle and replayed; rebuilt only after a resize. Building on click makes GSAP read
+     computed styles between its own writes. */
+  function build() {
+    const size = innerWidth + 'x' + innerHeight;
+    if (tl && tlSize === size) return tl;
+    tl?.kill(); tlSize = size;
+    const lines = $$('.menu-row-mask .menu-roll'), rules = $$('.menu-row-rule');
+    tl = g.timeline({ paused: true, defaults: { ease: 'expo.inOut' }, onReverseComplete: finishClose })
+      .fromTo($('.menu-curtain'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .8 }, 0)
+      .fromTo(fade, { a: 1 }, { a: CFG.dim, duration: .8, onUpdate: applyPage }, 0)
+      .fromTo(fade, { y: 0 }, { y: CFG.drift, duration: .8, onUpdate: applyPage }, 0)
+      .fromTo(lines, { y: '1.2em' }, { y: 0, duration: .9, stagger: .055, ease: 'expo.out' }, .38)
+      .fromTo(rules, { scaleX: 0 }, { scaleX: 1, duration: .9, stagger: .05, ease: 'expo.out' }, .34)
+      .fromTo($$('.menu-row-index, .menu-row-note'), { autoAlpha: 0 }, { autoAlpha: 1, duration: .5, stagger: .03, ease: 'power2.out' }, .55)
+      .fromTo($('.menu-window'), { clipPath: 'inset(100% 0% 0% 0% round 50% 50% 0 0 / 22% 22% 0 0)' }, { clipPath: 'inset(0% 0% 0% 0% round 50% 50% 0 0 / 22% 22% 0 0)', duration: .95 }, .3)
+      .fromTo($('.menu-window'), { scale: 1.1 }, { scale: 1, duration: 1.2, ease: 'expo.out' }, .3)
+      .fromTo($$('.menu-top > *, .menu-foot > *, .menu-preview figcaption'), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: .5, stagger: .04, ease: 'power2.out' }, .6)
+      // Keyboard focus lands on the close button once it has faded in.
+      .add(() => { if (tl.reversed() || !d.open) return; const a = document.activeElement; if (!d.contains(a) || a === d) $('.menu-close').focus({ preventScroll: true }); }, .72);
+    return tl;
+  }
+  (window.requestIdleCallback || (fn => setTimeout(fn, 300)))(() => { if (!reduced() && !d.open) build(); imgs.forEach(im => im.decode?.().catch(() => {})); }, { timeout: 4000 });
+  addEventListener('resize', () => { if (!d.open) tlSize = ''; }, { passive: true });
+
+  function open() {
+    navigateTo = null;
+    const a = activeIndex();
+    rows.forEach((r, i) => { r.classList.toggle('is-current', i === a); i === a ? r.setAttribute('aria-current', 'location') : r.removeAttribute('aria-current'); });
+    preview(a < 0 ? 0 : a, true);
+    if (reduced()) { d.showModal(); $('.menu-close').focus(); triggerBtn.setAttribute('aria-expanded', 'true'); return; }
+    build();
+    // With the rows inert during showModal, the dialog itself takes focus instead of the first row.
+    const inner = $('.menu-inner'); inner.inert = true; d.showModal(); inner.inert = false; d.focus({ preventScroll: true });
+    triggerBtn.setAttribute('aria-expanded', 'true');
+    armed = true; tl.timeScale(1).play(0);
+  }
+  function close() {
+    if (!d.open) return;
+    if (reduced() || !tl || !armed) return finishClose();
+    tl.timeScale(CFG.closeSpeed).reverse();
+  }
+  function finishClose() {
+    armed = false;
+    main.style.opacity = ''; main.style.visibility = ''; g.set(main, { clearProps: 'transform' });
+    d.close(); triggerBtn.setAttribute('aria-expanded', 'false');
+    const to = navigateTo; navigateTo = null;
+    if (to) { document.querySelector(to).scrollIntoView({ behavior: reduced() ? 'instant' : 'smooth' }); history.replaceState(null, '', to); }
+    else triggerBtn.focus({ preventScroll: true });
+  }
+  triggerBtn.addEventListener('click', open);
+  $('.menu-close').addEventListener('click', close);
+  d.addEventListener('cancel', e => { e.preventDefault(); close(); });   // Escape plays the close
+})();
+</script>
+</body>
+</html>

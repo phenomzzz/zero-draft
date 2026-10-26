@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel strip | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --ease: cubic-bezier(.19, 1, .22, 1); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 24px; }
+  .chosen { color: var(--muted); margin: 0 0 16px; }
+  .strip { display: flex; gap: 10px; height: 560px; }
+  .panel { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; border-radius: 16px; background: #cfcac0; color: #fff; }
+  .panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .panel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 55%); pointer-events: none; }
+  /* The whole panel is the browse control; it only expands, it never chooses. */
+  .browse { position: absolute; inset: 0; z-index: 1; border: 0; background: none; color: inherit; text-align: left; padding: 18px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+  .short { font-size: 14px; }
+  .short strong { display: block; font-size: 22px; transition: transform .6s var(--ease); }
+  .panel:hover .short strong { transform: translateY(-4px); }
+  .vertical { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 22px; font-weight: 600; white-space: nowrap; transition: opacity .3s; }
+  .panel[data-active="true"] .vertical { opacity: 0; }
+  .expanded { position: absolute; z-index: 2; left: 24px; right: 24px; bottom: 24px; max-width: 46ch; }
+  .expanded h2 { margin: 0 0 6px; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.1; }
+  .expanded p { margin: 0 0 14px; }
+  .expanded button { border: 1px solid #fff; background: none; border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+  .badge { display: inline-block; margin-left: 10px; font-size: 14px; }
+  .badge[hidden] { display: none; }
+  /* Expanded copy fades in after the panel has room, and out quickly before it shrinks. */
+  .panel:not([data-active="true"]) .expanded { visibility: hidden; opacity: 0; translate: 0 12px; transition: opacity .25s, translate .5s var(--ease), visibility 0s linear .25s; }
+  .panel[data-active="true"] .expanded { visibility: visible; opacity: 1; translate: 0 0; transition: opacity .4s .12s, translate .7s var(--ease), visibility 0s; }
+  @media (max-width: 760px) {
+    .strip { flex-direction: column; height: 820px; gap: 8px; }
+    /* Stacked panels are short when closed: the title moves up beside the number. */
+    .browse { flex-direction: row; align-items: flex-start; }
+    .vertical { writing-mode: horizontal-tb; transform: none; font-size: 18px; text-align: right; }
+  }
+  @media (prefers-reduced-motion: reduce) { .panel .expanded, .panel[data-active="true"] .expanded { transition: none; translate: none; } }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Panel strip</h1>
+  <p>A row of panels where hovering or focusing one widens it and narrows its neighbours by distance. The others zoom in slightly, shift with a little parallax and darken. Looking at a panel never chooses it: choosing is a separate button inside the open panel. On touch, the first tap opens a panel and the second uses it.</p>
+  <p>Base component: expanding-strip (annnimate catalog), recreated from scratch. Values as tuned in the booking build. <a href="index.html">All components</a></p>
+</header>
+<main class="wrap">
+  <p class="chosen" role="status" data-chosen>Nothing chosen yet.</p>
+  <div class="strip" data-strip></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const img = (seed, w, h) => `https://picsum.photos/seed/zd-${seed}/${w}/${h}`;
+
+  const CFG = {
+    activeGrow: 3.7,               // flex-grow of the open panel
+    falloff: .15, minGrow: .6,     // neighbours: max(minGrow, 1 - distance * falloff)
+    idleScale: 1.07, idleShift: 2, idleBrightness: .75,   // closed panels: zoom, xPercent per step, dimming
+    duration: .85, ease: 'expo.out'
+  };
+  const ITEMS = [
+    { title: 'The Loft', short: 'For 2', text: 'One room under the roof, a reading corner and a skylight.' },
+    { title: 'The Barn', short: 'For 4', text: 'Two bedrooms, a long table and doors that open to the yard.' },
+    { title: 'The Studio', short: 'For 2', text: 'A single open space with a kitchen along one wall.' },
+    { title: 'The Garden House', short: 'For 6', text: 'Three bedrooms around a courtyard with a fig tree.' },
+    { title: 'The Cabin', short: 'For 3', text: 'A small wooden house at the end of the path.' }
+  ];
+  const strip = $('[data-strip]');
+  strip.innerHTML = ITEMS.map((s, i) => `<article class="panel" data-active="${i === 0}"><img src="${img('stay' + i, 1200, 1100)}" alt="" loading="lazy">
+    <button class="browse" type="button" aria-label="Show ${s.title}"><span class="short">${s.short}<strong>0${i + 1}</strong></span><span class="vertical" aria-hidden="true">${s.title}</span></button>
+    <div class="expanded"><h2>${s.title}</h2><p>${s.text}</p><button type="button" data-choose="${i}">Choose ${s.title}</button><span class="badge" data-badge hidden>Your choice</span></div></article>`).join('');
+  const panels = $$('.panel');
+  let viewed = 0;
+
+  function focusPanel(k, instant = false) {
+    viewed = k;
+    const dur = instant || reduced() ? 0 : CFG.duration;
+    panels.forEach((p, i) => {
+      const active = i === k, grow = active ? CFG.activeGrow : Math.max(CFG.minGrow, 1 - Math.abs(i - k) * CFG.falloff);
+      p.dataset.active = String(active); $('.expanded', p).inert = !active;
+      gsap.to(p, { flexGrow: grow, duration: dur, ease: CFG.ease, overwrite: true });
+      gsap.to($('img', p), { scale: active ? 1 : CFG.idleScale, xPercent: active ? 0 : (i - k) * CFG.idleShift, filter: `brightness(${active ? 1 : CFG.idleBrightness})`, duration: dur, ease: CFG.ease, overwrite: true });
+    });
+  }
+  panels.forEach((p, i) => {
+    const browse = $('.browse', p);
+    let touch = false, wasOpen = true;
+    p.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') focusPanel(i); });
+    const press = e => { touch = e.type === 'touchstart' || e.pointerType !== 'mouse'; wasOpen = viewed === i; };
+    browse.addEventListener('touchstart', press, { passive: true });
+    browse.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') touch = false; else press(e); });
+    browse.addEventListener('focus', () => { if (!touch) focusPanel(i); });
+    // Touch: the first tap opens the panel; the second moves on to its content.
+    browse.addEventListener('click', () => {
+      if (touch && !wasOpen) { touch = false; focusPanel(i); return; }
+      touch = false; focusPanel(i); $('[data-choose]', p).focus();
+    });
+  });
+  strip.addEventListener('click', e => {
+    const b = e.target.closest('[data-choose]'); if (!b) return;
+    const k = +b.dataset.choose;
+    panels.forEach((p, i) => { $('[data-badge]', p).hidden = i !== k; });
+    $('[data-chosen]').textContent = `Your choice: ${ITEMS[k].title}`;
+  });
+  focusPanel(0, true);
+})();
+</script>
+</body>
+</html>

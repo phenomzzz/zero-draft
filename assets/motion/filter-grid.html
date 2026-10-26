@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filter grid | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button, input { font: inherit; color: inherit; }
+  img { display: block; max-width: 100%; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: center; margin-bottom: 24px; }
+  .pills { position: relative; display: inline-flex; padding: 4px; border-radius: 999px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .pill { position: relative; z-index: 1; border: 0; background: none; padding: 10px 18px; border-radius: 999px; cursor: pointer; transition: color .3s; }
+  .pill[aria-pressed="true"] { color: var(--ground); }
+  /* One highlight travels between pills; it is positioned with x and width, never re-parented. */
+  .pill-hl { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 999px; background: var(--ink); }
+  .search input { width: min(280px, 70vw); padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  .count { margin: 0; color: var(--muted); }
+  .count b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .grid li.is-hidden { display: none; }
+  .card { background: var(--panel); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 0 var(--line); }
+  .card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #ddd; }
+  .card div { padding: 12px 14px 14px; }
+  .card h2 { font-size: 17px; margin: 0; font-weight: 600; }
+  .card p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .empty { padding: 32px 0; color: var(--muted); }
+  .empty button { border: 1px solid var(--ink); background: none; border-radius: 999px; padding: 8px 16px; margin-left: 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Filter grid</h1>
+  <p>Cards that stay in the result glide to their new places, cards that join scale in a beat later, the highlight slides between filters and the count runs to the new total.</p>
+  <p>Base component: flip-filter (annnimate catalog), recreated from scratch. Values as tuned in the community build. <a href="index.html">All components</a></p>
+</header>
+<main class="wrap">
+  <div class="filters">
+    <div class="pills" role="group" aria-label="Filter by surface">
+      <span class="pill-hl" aria-hidden="true"></span>
+      <button class="pill" type="button" data-kind="all" aria-pressed="true">All</button>
+      <button class="pill" type="button" data-kind="road" aria-pressed="false">Road</button>
+      <button class="pill" type="button" data-kind="gravel" aria-pressed="false">Gravel</button>
+      <button class="pill" type="button" data-kind="trail" aria-pressed="false">Trail</button>
+    </div>
+    <label class="search"><span class="sr">Search routes</span><input type="search" placeholder="Search routes" data-search autocomplete="off"></label>
+    <p class="count"><b data-count aria-hidden="true">0</b> <span aria-hidden="true" data-count-label>routes</span><span class="sr" role="status" data-count-live></span></p>
+  </div>
+  <ul class="grid" data-grid></ul>
+  <p class="empty" data-empty hidden>No route matches “<span data-empty-q></span>” <span data-empty-kind></span>.<button type="button" data-clear>Clear filters</button></p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/Flip.min.js" integrity="sha384-lg3+EgIwmxYq9YD4ix279pdUEasqmOS17fF+2mI/NEg6JHkawYaWYpJ6nKZenPOy" crossorigin="anonymous"></script>
+<script>
+(() => {
+  gsap.registerPlugin(Flip);
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const img = (seed, w, h) => `https://picsum.photos/seed/zd-${seed}/${w}/${h}`;
+  const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  const CFG = {
+    staying: { duration: .6, ease: 'expo.inOut', stagger: .012 },               // Flip of cards that remain
+    entering: { from: .94, duration: .5, delay: .18, ease: 'expo.out', stagger: .02 }, // cards that join
+    highlight: { duration: .5, ease: 'expo.out' },
+    count: { duration: .5, ease: 'power2.out' }
+  };
+
+  const KIND = { road: 'Road', gravel: 'Gravel', trail: 'Trail' };
+  const KIND_PL = { all: '', road: 'among road routes', gravel: 'among gravel routes', trail: 'among trail routes' };
+  const DATA = [
+    ['Ridge Loop', 'trail', 18], ['Lakeshore', 'road', 42], ['Quarry Run', 'gravel', 27], ['Old Mill', 'road', 35],
+    ['Pine Climb', 'trail', 12], ['Dust Bowl', 'gravel', 54], ['Harbour Line', 'road', 61], ['Fern Hollow', 'trail', 9],
+    ['Salt Flats', 'gravel', 38], ['Bell Tower', 'road', 22], ['Cedar Switchbacks', 'trail', 15], ['Wheat Fields', 'gravel', 46],
+    ['Coast Road', 'road', 80], ['Rock Garden', 'trail', 7], ['River Gravel', 'gravel', 31], ['Night Circuit', 'road', 19]
+  ];
+  const grid = $('[data-grid]');
+  grid.innerHTML = DATA.map(([name, kind, km], i) => `
+    <li data-kind="${kind}" data-q="${norm(name + ' ' + KIND[kind])}">
+      <article class="card"><img src="${img('route' + i, 480, 360)}" alt="" width="480" height="360" loading="${i < 8 ? 'eager' : 'lazy'}">
+        <div><h2>${name}</h2><p>${KIND[kind]}, ${km} km</p></div></article>
+    </li>`).join('');
+  const items = $$('li', grid);
+  const pills = $$('.pill'), hl = $('.pill-hl'), search = $('[data-search]');
+  const countEl = $('[data-count]'), countLbl = $('[data-count-label]'), countLive = $('[data-count-live]'), empty = $('[data-empty]');
+  let kind = 'all', q = '', flip = null;
+  const counter = { v: items.length };
+  countEl.textContent = items.length;
+
+  const moveHl = (b, instant) => gsap.to(hl, { x: b.offsetLeft, width: b.offsetWidth, ...CFG.highlight, duration: instant || reduced() ? 0 : CFG.highlight.duration, overwrite: true });
+  function setCount(n) {
+    countLbl.textContent = n === 1 ? 'route' : 'routes';
+    countLive.textContent = `${n} ${n === 1 ? 'route' : 'routes'}`; // the live region gets the final value only
+    if (reduced()) { countEl.textContent = n; counter.v = n; return; }
+    gsap.to(counter, { v: n, ...CFG.count, overwrite: true, onUpdate: () => { countEl.textContent = Math.round(counter.v); } });
+  }
+  function apply() {
+    const qq = norm(q.trim());
+    const show = li => (kind === 'all' || li.dataset.kind === kind) && (!qq || li.dataset.q.includes(qq));
+    if (!items.some(li => show(li) === li.classList.contains('is-hidden'))) return;
+    if (flip) { flip.kill(); flip = null; }
+    gsap.killTweensOf(items); gsap.set(items, { clearProps: 'all' });
+    const staying = items.filter(li => !li.classList.contains('is-hidden') && show(li));
+    const entering = items.filter(li => li.classList.contains('is-hidden') && show(li));
+    const state = reduced() ? null : Flip.getState(staying);   // read before the layout changes
+    items.forEach(li => li.classList.toggle('is-hidden', !show(li)));
+    const n = items.filter(li => !li.classList.contains('is-hidden')).length;
+    setCount(n);
+    $('[data-empty-q]').textContent = q.trim() || '…';
+    $('[data-empty-kind]').textContent = KIND_PL[kind];
+    empty.hidden = n > 0;
+    if (state) {
+      flip = Flip.from(state, { targets: staying, ...CFG.staying, onComplete: () => { flip = null; } });
+      gsap.fromTo(entering, { opacity: 0, scale: CFG.entering.from },
+        { opacity: 1, scale: 1, duration: CFG.entering.duration, delay: CFG.entering.delay, ease: CFG.entering.ease, stagger: CFG.entering.stagger, clearProps: 'opacity,scale,transform' });
+    }
+  }
+  pills.forEach(b => b.addEventListener('click', () => {
+    kind = b.dataset.kind; pills.forEach(p => p.setAttribute('aria-pressed', String(p === b))); moveHl(b); apply();
+  }));
+  search.addEventListener('input', () => { q = search.value; apply(); });
+  $('[data-clear]').addEventListener('click', () => {
+    search.value = ''; q = ''; kind = 'all';
+    pills.forEach(p => p.setAttribute('aria-pressed', String(p.dataset.kind === 'all'))); moveHl(pills[0]); apply(); search.focus();
+  });
+  // Pill widths change when the web font arrives and on resize: re-place without animating.
+  const replace = () => moveHl(pills.find(p => p.dataset.kind === kind), true);
+  moveHl(pills[0], true);
+  document.fonts?.ready.then(replace);
+  addEventListener('resize', replace);
+})();
+</script>
+</body>
+</html>

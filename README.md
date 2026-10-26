@@ -13,6 +13,7 @@ It works with Claude Code and Codex. The method references are tool-neutral, so 
 - **Contextual de-slop.** Visual, copy (English and Brazilian Portuguese) and CTA-density reviews that research the sector first and treat detector output as leads, not bans.
 - **Interaction contracts.** State models for calendars, comparisons, drawers and forms, with the transition sequences to test.
 - **Motion recipes.** GSAP/ScrollTrigger, Lenis, image sequences, video tiers, route transitions and reduced-motion handling, taken from mechanisms observed on production sites and written as original sketches.
+- **Motion kit.** Nine standalone components (magnetic button, filter grid, side sheet, pinned steps, split reveal, opening frame, scroll header, fullscreen menu, panel strip) with the values they shipped with in two production sites.
 - **Verification.** An evidence ladder, a responsive matrix and read-only browser helpers for audits and for probing reference sites.
 - **Evals.** Trigger evals, a divergence trial and a grading rubric for testing revisions of the skill itself.
 
@@ -41,7 +42,7 @@ Claude Code loads it from the description or from `/zero-draft`. Codex uses `$ze
 | `SKILL.md` | Entry point: modes, routing table and quality contract |
 | `references/` | Method references, loaded only when a task needs them |
 | `references/licenses/` | Notices for adapted upstream material |
-| `assets/` | Project-packet templates, a local preview workbench, a `launch.json` example |
+| `assets/` | Project-packet templates, a local preview workbench, the [motion kit](assets/motion/README.md), a `launch.json` example |
 | `scripts/` | Packet scaffolder, package checker, browser audit and reference probe helpers, tests |
 | `evals/` | Trigger evals, divergence trial, rubric, capture and probe tools |
 
@@ -65,6 +66,6 @@ The skill reflects one practitioner's working method. Its rules about divergence
 
 ## Credits and license
 
-The workflow, scripts and syntheses are original. Some concepts are adapted from MIT and Apache-2.0 skill collections; [references/sources-and-reuse.md](references/sources-and-reuse.md) lists each source with pinned commits, and the notices are in [references/licenses/](references/licenses/). Keep those notices when you redistribute substantial derived material.
+The workflow, scripts and syntheses are original. Some concepts are adapted from MIT and Apache-2.0 skill collections; [references/sources-and-reuse.md](references/sources-and-reuse.md) lists each source with pinned commits, and the notices are in [references/licenses/](references/licenses/). Keep those notices when you redistribute substantial derived material. The motion kit's components began as from-scratch recreations of components in the annnimate catalog; [assets/motion/README.md](assets/motion/README.md) credits each one.
 
 Released under the [MIT License](LICENSE). The license covers this repository only, not any font, website, asset or library that it mentions.

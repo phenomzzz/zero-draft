@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Side sheet | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  img { display: block; max-width: 100%; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 24px 120vh; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .card { width: 100%; text-align: left; border: 0; padding: 0; background: var(--panel); border-radius: 14px; overflow: hidden; cursor: pointer; }
+  .card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #ddd; transition: transform .6s cubic-bezier(.19, 1, .22, 1); }
+  .card:hover img { transform: scale(1.03); }
+  .card span { display: block; padding: 12px 14px 14px; font-weight: 600; }
+
+  /* The dialog fills the viewport; its own background is the dimmer, animated as a colour. */
+  dialog.sheet { margin: 0; padding: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: rgba(20, 18, 16, 0); overflow: hidden; }
+  dialog.sheet::backdrop { background: transparent; }
+  .sheet-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(760px, 100%); background: var(--panel); display: grid; grid-template-rows: auto 1fr; box-shadow: -24px 0 60px rgba(0, 0, 0, .12); }
+  .sheet-media { margin: 0; height: min(38vh, 340px); overflow: hidden; background: #ddd; }
+  .sheet-media img { width: 100%; height: 100%; object-fit: cover; }
+  .sheet-body { overflow: auto; overscroll-behavior: contain; padding: 24px 32px 32px; }
+  .sheet-name { font-size: clamp(28px, 4vw, 44px); line-height: 1.05; margin: 0 0 6px; }
+  .sheet-line { color: var(--muted); margin: 0 0 20px; }
+  .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .specs ul { list-style: none; margin: 0; padding: 0; }
+  .slot { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .slot b { font-weight: 600; }
+  .sheet-foot { display: flex; gap: 12px; margin-top: 24px; }
+  .sheet-foot button, .sheet-close { border: 1px solid var(--ink); background: none; border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+  .sheet-foot button:disabled { opacity: .35; cursor: default; }
+  .sheet-close { position: absolute; top: 16px; right: 16px; z-index: 2; background: var(--panel); }
+  @media (max-width: 640px) { .specs { grid-template-columns: 1fr; } .sheet-body { padding: 20px; } }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Side sheet</h1>
+  <p>A detail panel slides in from the right while the page dims, the photo settles and the content arrives in groups. Previous and next step through items without closing. Closing plays out, returns focus to the card and restores the scroll position.</p>
+  <p>Base component: detail-drawer (annnimate catalog), recreated from scratch. Values as tuned in the community build. <a href="index.html">All components</a></p>
+</header>
+<main class="wrap">
+  <ul class="grid" data-grid></ul>
+</main>
+<dialog class="sheet" data-sheet aria-labelledby="sheet-name">
+  <button class="sheet-close" type="button" data-close>Close</button>
+  <div class="sheet-panel">
+    <figure class="sheet-media"><img data-sheet-img alt=""></figure>
+    <div class="sheet-body" data-scroll>
+      <h2 class="sheet-name" id="sheet-name"></h2>
+      <p class="sheet-line" data-sheet-line></p>
+      <div class="specs"><ul class="spec-l" data-spec-l></ul><ul class="spec-r" data-spec-r></ul></div>
+      <div class="sheet-foot"><button type="button" data-prev>Previous</button><button type="button" data-next>Next</button></div>
+    </div>
+  </div>
+</dialog>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const img = (seed, w, h) => `https://picsum.photos/seed/zd-${seed}/${w}/${h}`;
+
+  const DIM = 'rgba(20, 18, 16, .72)', CLEAR = 'rgba(20, 18, 16, 0)';
+  const CFG = {
+    panelIn: .8, panelOut: .55,  // xPercent 105 → 0 and back, expo.inOut
+    dimIn: .45, dimOut: .35,
+    guardMs: 900                  // the close always completes, even if a tween is interrupted
+  };
+
+  /* Scroll lock with owners: several overlays can hold it; the last one out releases it.
+     Wheel and scroll keys are blocked outside [data-scroll] instead of setting overflow: hidden,
+     so pinned or measured layouts behind the dialog do not shift. */
+  const SCROLL_KEYS = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+  const blockWheel = e => { if (!e.target.closest?.('[data-scroll]')) e.preventDefault(); };
+  const blockKeys = e => { if (SCROLL_KEYS.has(e.key) && !e.target.closest('input, textarea, select, [data-scroll]')) e.preventDefault(); };
+  const lock = {
+    owners: new Set(), y: 0,
+    set(k, on) {
+      const was = this.owners.size; on ? this.owners.add(k) : this.owners.delete(k);
+      if (!was && this.owners.size) { this.y = scrollY; addEventListener('wheel', blockWheel, { passive: false }); addEventListener('keydown', blockKeys, true); }
+      if (was && !this.owners.size) {
+        removeEventListener('wheel', blockWheel); removeEventListener('keydown', blockKeys, true);
+        if (Math.abs(scrollY - this.y) > 1) scrollTo({ top: this.y, behavior: 'instant' });
+      }
+    }
+  };
+
+  const ITEMS = ['Harbour', 'Orchard', 'Glasshouse', 'Boatyard', 'Terrace', 'Workshop', 'Library', 'Courtyard'].map((name, i) => ({
+    name, line: `Item ${i + 1} of 8, placeholder details`,
+    left: [['Size', `${20 + i * 3} m²`], ['Floor', i % 3 ? 'Ground' : 'Upper'], ['Light', i % 2 ? 'East' : 'West']],
+    right: [['Seats', 4 + i], ['Access', 'Step-free'], ['Open', 'All year']]
+  }));
+  $('[data-grid]').innerHTML = ITEMS.map((it, i) => `<li><button class="card" type="button" aria-haspopup="dialog" data-i="${i}"><img src="${img('room' + i, 480, 480)}" alt="" width="480" height="480"><span>${it.name}</span></button></li>`).join('');
+
+  const dlg = $('[data-sheet]'), panel = $('.sheet-panel'), photo = $('[data-sheet-img]');
+  let idx = -1, trigger = null, tl = null, closing = false;
+  const slot = ([k, v]) => `<li class="slot"><span>${k}</span><b>${v}</b></li>`;
+  function fill(i) {
+    const it = ITEMS[i]; idx = i;
+    photo.src = img('room' + i, 1200, 700); photo.alt = it.name;
+    $('#sheet-name').textContent = it.name; $('[data-sheet-line]').textContent = it.line;
+    $('[data-spec-l]').innerHTML = it.left.map(slot).join(''); $('[data-spec-r]').innerHTML = it.right.map(slot).join('');
+    $('[data-prev]').disabled = i <= 0; $('[data-next]').disabled = i >= ITEMS.length - 1;
+  }
+  function open(i, from) {
+    trigger = from; closing = false;
+    tl?.kill();
+    fill(i);
+    if (!dlg.open) { lock.set('sheet', true); dlg.showModal(); }
+    $('[data-close]').focus({ preventScroll: true });
+    if (reduced()) { gsap.set(panel, { xPercent: 0 }); gsap.set(dlg, { backgroundColor: DIM }); return; }
+    tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+      .fromTo(dlg, { backgroundColor: CLEAR }, { backgroundColor: DIM, duration: CFG.dimIn, ease: 'power2.out' }, 0)
+      .fromTo(panel, { xPercent: 105 }, { xPercent: 0, duration: CFG.panelIn, ease: 'expo.inOut' }, 0)
+      .fromTo(photo, { scale: 1.15, yPercent: 5 }, { scale: 1, yPercent: 0, duration: 1.2 }, .2)
+      .fromTo('.sheet-name', { yPercent: 60, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .8 }, .4)
+      .fromTo('.spec-l .slot', { x: -24, opacity: 0 }, { x: 0, opacity: 1, duration: .6, stagger: .04 }, .5)
+      .fromTo('.spec-r .slot', { x: 24, opacity: 0 }, { x: 0, opacity: 1, duration: .6, stagger: .04 }, .5)
+      .fromTo(['.sheet-line', '.sheet-foot'], { opacity: 0 }, { opacity: 1, duration: .6, stagger: .05 }, .6);
+  }
+  function step(dir) {
+    const k = idx + dir; if (k < 0 || k >= ITEMS.length) return;
+    trigger = $(`.card[data-i="${k}"]`);
+    fill(k);
+    if (reduced()) return;
+    gsap.fromTo([photo, '.sheet-name'], { opacity: 0, x: 40 * dir }, { opacity: 1, x: 0, duration: .5, ease: 'expo.out', overwrite: true });
+    gsap.fromTo('.slot', { opacity: 0 }, { opacity: 1, duration: .4, stagger: .015, overwrite: true });
+  }
+  function close() {
+    if (!dlg.open || closing) return; closing = true;
+    tl?.kill();
+    let fired = false, guard = 0;
+    const done = () => {
+      if (fired) return; fired = true; clearTimeout(guard);
+      dlg.close(); lock.set('sheet', false); closing = false;
+      trigger?.focus({ preventScroll: true });
+    };
+    if (reduced()) return done();
+    guard = setTimeout(done, CFG.guardMs);
+    tl = gsap.timeline({ onComplete: done })
+      .to(panel, { xPercent: 105, duration: CFG.panelOut, ease: 'expo.inOut' }, 0)
+      .to(dlg, { backgroundColor: CLEAR, duration: CFG.dimOut, ease: 'power2.in' }, .15);
+  }
+  $('[data-grid]').addEventListener('click', e => { const b = e.target.closest('.card'); if (b) open(+b.dataset.i, b); });
+  dlg.addEventListener('cancel', e => { e.preventDefault(); close(); });     // Escape plays the close
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });    // click on the dimmed area
+  $('[data-close]').addEventListener('click', close);
+  $('[data-prev]').addEventListener('click', () => step(-1));
+  $('[data-next]').addEventListener('click', () => step(1));
+  dlg.addEventListener('keydown', e => { if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+})();
+</script>
+</body>
+</html>

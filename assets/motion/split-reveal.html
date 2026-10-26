@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split reveal | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+  .label { max-width: 64ch; margin: 0 auto; padding: 0 24px; color: var(--muted); }
+
+  /* A: characters gather from the centre, scrubbed by scroll inside a sticky stage. */
+  .gather { height: 220vh; }
+  .gather-stage { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+  .gather-word { margin: 0; font-size: clamp(64px, 14vw, 220px); line-height: .9; font-weight: 750; letter-spacing: -.02em; }
+
+  /* B: lines rise inside their own masks the first time the paragraph enters. */
+  .lines { max-width: 1100px; margin: 0 auto; padding: 30vh 24px 50vh; }
+  .lines p { margin: 0; font-size: clamp(30px, 4.4vw, 64px); line-height: 1.08; letter-spacing: -.01em; max-width: 18ch; }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Split reveal</h1>
+  <p>Two text entrances. A: the characters of one word start turned, shrunk and pulled toward the middle of the word, then gather into place from the centre outward as you scroll. B: a paragraph’s lines rise into place inside their own masks once, when it enters the viewport.</p>
+  <p>Base components: character-appear and text-reveal (annnimate catalog), recreated from scratch. A uses the community build’s values, B the booking build’s. <a href="index.html">All components</a></p>
+</header>
+<p class="label">A. Scroll to gather the word.</p>
+<section class="gather" aria-label="Scrubbed character reveal">
+  <div class="gather-stage"><h2 class="gather-word" data-gather>Assemble</h2></div>
+</section>
+<p class="label">B. Lines rise once, as the paragraph enters.</p>
+<section class="lines">
+  <p data-lines>Every line waits under its own edge and rises when the paragraph comes into view, so the text is never cropped mid-word.</p>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js" integrity="sha384-xb96EMJeax+NLXMC88ZBa1xAeAW+kn+horHh/zFlbMLG2UPWhMJJSlv7fi57hS+Q" crossorigin="anonymous"></script>
+<script>
+(() => {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+  const $ = (s, r = document) => r.querySelector(s);
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const REDUCED = rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  rmq.addEventListener('change', () => location.reload());
+  if (REDUCED) return;   // both texts simply stay readable
+
+  /* A. Centre-out characters (community build). */
+  const GATHER = {
+    turn: 88,                       // rotationY at the start, signed by side of the word
+    scale: .35, perspective: 900, origin: '50% 60%',
+    scrub: .7,
+    tween: { duration: .62, ease: 'power3.out', stagger: { each: .045, from: 'center' } }
+  };
+  document.fonts.ready.then(() => {
+    const word = $('[data-gather]');
+    const split = SplitText.create(word, { type: 'chars' });
+    const chars = split.chars;
+    // Each character's offset from the centre of the word.
+    const dx = c => { const base = chars[0].offsetLeft, l = c.offsetLeft - base; return word.offsetWidth / 2 - (l + c.offsetWidth / 2); };
+    // The start pose is set explicitly, then tweened away with .to(), as shipped: inside a timeline, a
+    // staggered fromTo only renders its start values for the targets whose stagger has begun.
+    gsap.set(chars, { x: (i, c) => dx(c), rotationY: (i, c) => dx(c) > 0 ? -GATHER.turn : GATHER.turn, scale: GATHER.scale, opacity: 0, transformPerspective: GATHER.perspective, transformOrigin: GATHER.origin });
+    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.gather', start: 'top top', end: 'bottom bottom', scrub: GATHER.scrub } })
+      .to(chars, { x: 0, rotationY: 0, scale: 1, opacity: 1, ...GATHER.tween }, .1)
+      .to({}, { duration: .2 });   // a short hold before the stage scrolls away
+
+    /* B. Masked lines, once (booking build). autoSplit re-splits on resize and calls onSplit again;
+       the start position is set explicitly for the same reason as above. */
+    SplitText.create('[data-lines]', {
+      type: 'lines', mask: 'lines', autoSplit: true,
+      onSplit: self => {
+        gsap.set(self.lines, { yPercent: 110 });
+        return gsap.to(self.lines, { yPercent: 0, duration: 1.2, ease: 'expo.out', stagger: .12, scrollTrigger: { trigger: '[data-lines]', start: 'top 85%', once: true } });
+      }
+    });
+    requestAnimationFrame(() => requestAnimationFrame(() => ScrollTrigger.refresh()));
+  });
+})();
+</script>
+</body>
+</html>

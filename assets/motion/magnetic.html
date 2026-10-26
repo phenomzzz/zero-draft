@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magnetic button | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  .note { max-width: 64ch; margin: 0 auto; padding: 48px 24px 8px; color: var(--muted); }
+  .note h1 { color: var(--ink); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 12px; font-weight: 650; }
+  .note p { margin: 0 0 8px; }
+  .note a { color: inherit; }
+
+  .stage { min-height: 60vh; display: flex; flex-wrap: wrap; gap: 72px; align-items: center; justify-content: center; padding: 48px 24px; }
+  /* The zone is larger than the button, so the pull starts before the pointer reaches it. */
+  .mag { padding: 32px; }
+  .btn { display: inline-block; border: 0; border-radius: 999px; padding: 18px 32px; background: var(--ink); color: var(--ground); cursor: pointer; will-change: transform; }
+  .btn-t { display: inline-block; pointer-events: none; }
+  .btn-quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .status { text-align: center; color: var(--muted); min-height: 1.6em; }
+</style>
+</head>
+<body>
+<header class="note">
+  <h1>Magnetic button</h1>
+  <p>The button leans toward the pointer and its label leans a little further, then it springs back when the pointer leaves. Only on a fine pointer with hover, and off under reduced motion.</p>
+  <p>Base component: magnetic-button (annnimate catalog), recreated from scratch. Values as tuned in both builds. <a href="index.html">All components</a></p>
+</header>
+<main>
+  <div class="stage">
+    <div class="mag" data-strength=".3" data-label=".12"><button class="btn" type="button"><span class="btn-t">Send the request</span></button></div>
+    <div class="mag" data-strength=".18" data-label="0"><button class="btn btn-quiet" type="button"><span class="btn-t">Plan a visit</span></button></div>
+  </div>
+  <p class="status" role="status"></p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+  const FINE = matchMedia('(hover: hover) and (pointer: fine)');
+
+  const CFG = {
+    follow: { duration: .6, ease: 'power3.out' },          // quickTo while the pointer moves
+    release: { duration: 1, ease: 'elastic.out(1, .35)' }    // the community build; the booking build used (1, .4)
+  };
+  // data-strength: how far the button follows (.3 primary CTA, .18 a quieter floating control).
+  // data-label: how far the label follows on top of that (.12 gives a slight parallax; 0 for none).
+
+  $$('.mag').forEach(zone => {
+    const b = $('.btn', zone), t = $('.btn-t', b);
+    const k = +zone.dataset.strength, kt = +zone.dataset.label;
+    const bx = gsap.quickTo(b, 'x', CFG.follow), by = gsap.quickTo(b, 'y', CFG.follow);
+    const tx = gsap.quickTo(t, 'x', CFG.follow), ty = gsap.quickTo(t, 'y', CFG.follow);
+    zone.addEventListener('pointermove', e => {
+      if (!FINE.matches || reduced() || e.pointerType !== 'mouse') return;
+      // Measured from the moving button, as shipped: the offset shrinks as it approaches,
+      // so it settles short of the pointer instead of chasing it.
+      const r = b.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      bx(dx * k); by(dy * k); tx(dx * kt); ty(dy * kt);
+    });
+    zone.addEventListener('pointerleave', () => {
+      if (reduced()) return;
+      gsap.to([b, t], { x: 0, y: 0, ...CFG.release, overwrite: true });
+    });
+    b.addEventListener('click', () => { $('.status').textContent = `Pressed: ${t.textContent}`; });
+  });
+})();
+</script>
+</body>
+</html>

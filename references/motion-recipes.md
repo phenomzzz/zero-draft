@@ -118,3 +118,7 @@ Prefer an image sequence over setting `video.currentTime` from scroll when frame
 ## Preferences as live state
 
 Read `(prefers-reduced-motion: reduce)` and `(hover: hover)` as `MediaQueryList`s and subscribe to `change`; rebuild affected motion when they flip. Wrap decorative CSS loops in `@media (prefers-reduced-motion: no-preference) and (hover: hover)` so motion is opt-in rather than removed afterwards.
+
+## Working demos
+
+Runnable, tuned versions of several of these mechanisms are in the [motion kit](../assets/motion/README.md): a pinned step section with snap, hysteresis and a scroll-following indicator; masked line and centre-out character reveals with re-splitting; an opening frame whose geometry is all function values refreshed by ScrollTrigger; a menu built as one reversible timeline. Their values came from two shipped sites; tune them against real content.

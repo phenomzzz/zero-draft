@@ -77,3 +77,7 @@ Primary NN/g, W3C, Atlassian and Carbon guidance grounds grouping, semantic stru
 ## Creation integration
 
 Contextual quality is integrated at direction, representative-slice and whole-page stages. No component library, demo collection or asset is bundled. When a project uses one, verify actual reuse rights; local possession alone is not a license ([reuse rules](motion-and-media.md#reusing-demos-and-component-libraries)).
+
+## Motion kit
+
+The [motion kit](../assets/motion/README.md) holds nine components adapted and tuned in two of the author's production websites. Each started as a from-scratch recreation of a component in the annnimate catalog (annnimate.com), written only from the catalog's public component names, categories and attribute names. No annnimate code was viewed or copied, and none of its markup, styles or media were used. The kit README names the base component for each file. annnimate is not affiliated with this package. GSAP is loaded from a pinned CDN URL with integrity hashes and is not bundled.

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scroll header | zero-draft motion</title>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --dark: #1f2a24; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --ease: cubic-bezier(.19, 1, .22, 1); }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  button { font: inherit; color: inherit; }
+  a { color: inherit; }
+
+  /* At rest the header sits over the top of the page. Past the threshold it becomes fixed and starts
+     hidden; scrolling up brings it back. Only transform animates, with one easing. */
+  .header { position: absolute; top: 0; left: 0; right: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center; padding: 28px 5vw;
+    transition: transform .55s var(--ease), background-color .4s, color .4s, padding .4s var(--ease); }
+  .header.no-anim { transition: none; }
+  .header.is-fixed { position: fixed; padding: 14px 5vw; transform: translateY(-105%); background: rgba(243, 242, 239, .92); backdrop-filter: blur(10px); box-shadow: 0 1px 0 var(--line); }
+  .header.is-fixed.is-shown { transform: none; }
+  .header.is-fixed[data-theme="dark"] { background: rgba(31, 42, 36, .92); color: #f3f2ef; box-shadow: 0 1px 0 rgba(243, 242, 239, .12); }
+  .brand { font-weight: 700; text-decoration: none; font-size: 20px; }
+  .nav { display: flex; gap: 20px; align-items: center; }
+  .nav a { text-decoration: none; }
+  .nav button { border: 1px solid currentColor; background: none; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+  @media (prefers-reduced-motion: reduce) { .header { transition: background-color .2s, color .2s; } }
+
+  .hero { min-height: 92vh; display: grid; align-content: end; padding: 0 5vw 10vh; }
+  .hero h1 { font-size: clamp(40px, 7vw, 104px); line-height: .95; margin: 0 0 16px; max-width: 12ch; letter-spacing: -.02em; }
+  .hero p { max-width: 60ch; color: var(--muted); margin: 0; }
+  .band { min-height: 90vh; padding: 14vh 5vw; }
+  .band h2 { font-size: clamp(28px, 3.4vw, 48px); margin: 0 0 12px; }
+  .band p { max-width: 60ch; margin: 0; }
+  .band.dark { background: var(--dark); color: #f3f2ef; }
+</style>
+</head>
+<body>
+<header class="header">
+  <a class="brand" href="#top">Placeholder</a>
+  <nav class="nav" aria-label="Main"><a href="#one">One</a><a href="#two">Two</a><a href="index.html">All components</a><button type="button">Menu</button></nav>
+</header>
+<main id="top">
+  <section class="hero">
+    <h1>Scroll header</h1>
+    <p>Scroll down: the header leaves once you pass about half a screen, and comes back as soon as you scroll up. It also stays while it holds keyboard focus, or while the pointer is near the top of the window, and its colours follow the band underneath it. Base component: hide-header (annnimate catalog), recreated from scratch. Values as tuned in the booking build.</p>
+  </section>
+  <section class="band" id="one"><h2>A light band</h2><p>Scroll down more than 14 pixels and the header hides. Scroll up 40 pixels and it returns. The uneven pair keeps small accidental movements from flashing it.</p></section>
+  <section class="band dark" id="two"><h2>A dark band</h2><p>While a dark section sits under the header, the header switches to its dark theme. Section bounds are measured at most every 200 ms and after layout changes, never on every frame.</p></section>
+  <section class="band"><h2>Another light band</h2><p>Press Tab to move into the header: it stays visible while it holds focus.</p></section>
+  <section class="band dark"><h2>A second dark band</h2><p>Move the pointer to the top 90 pixels of the window to call the header back without scrolling.</p></section>
+  <section class="band"><h2>The end</h2><p>That is the whole behaviour.</p></section>
+</main>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const CFG = {
+    darkSections: '.band.dark',
+    threshold: vh => Math.min(vh * .5, 420), // scroll distance before the header becomes fixed
+    hideAfter: 14,       // px of downward scroll before it hides
+    showAfter: 40,       // px of upward scroll before it returns
+    pointerZone: 90,     // px from the top of the window that calls it back
+    remeasureMs: 200
+  };
+  const header = $('.header');
+  let fixed = false, shown = true, anchor = scrollY, queued = false, hoverTop = false;
+  // Geometry is read in the scroll event, before anything in the frame writes, so the reads are free.
+  let y = scrollY, headerH = header.offsetHeight, bands = [], measuredAt = 0, vh = innerHeight;
+  addEventListener('resize', () => { vh = innerHeight; }, { passive: true });
+  function measure() {
+    const top = scrollY; measuredAt = performance.now(); headerH = header.offsetHeight;
+    bands = $$(CFG.darkSections).map(el => { const r = el.getBoundingClientRect(); return [r.top + top, r.bottom + top]; });
+  }
+  function theme() {
+    const p = y + headerH + 8;
+    header.dataset.theme = bands.some(([a, b]) => p >= a && p < b) ? 'dark' : 'light';
+  }
+  function update() {
+    queued = false;
+    const wantFixed = y > CFG.threshold(vh);
+    if (wantFixed !== fixed) {
+      // Switching between in-flow and fixed must not animate, or the header slides in from nowhere.
+      fixed = wantFixed; header.classList.toggle('is-fixed', fixed); shown = false; anchor = y;
+      header.classList.add('no-anim'); header.classList.toggle('is-shown', false);
+      requestAnimationFrame(() => header.classList.remove('no-anim'));
+    }
+    if (fixed) {
+      anchor = shown ? Math.min(anchor, y) : Math.max(anchor, y);
+      const delta = y - anchor, engaged = header.matches(':focus-within') || hoverTop;
+      if (engaged) shown = true;
+      else if (shown && delta > CFG.hideAfter) { shown = false; anchor = y; }
+      else if (!shown && delta < -CFG.showAfter) { shown = true; anchor = y; }
+      header.classList.toggle('is-shown', shown);
+      theme();
+    }
+  }
+  const request = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  addEventListener('scroll', () => { y = scrollY; if (performance.now() - measuredAt > CFG.remeasureMs) measure(); request(); }, { passive: true });
+  addEventListener('pointermove', e => { const near = e.clientY < CFG.pointerZone; if (near !== hoverTop) { hoverTop = near; request(); } }, { passive: true });
+  header.addEventListener('focusin', request); header.addEventListener('focusout', request);
+  const remeasure = () => { y = scrollY; measure(); if (fixed) theme(); };
+  new ResizeObserver(remeasure).observe(document.body);
+  header.addEventListener('transitionend', e => { if (e.target === header && e.propertyName.startsWith('padding')) remeasure(); });
+  addEventListener('load', remeasure);
+  measure(); update();
+})();
+</script>
+</body>
+</html>

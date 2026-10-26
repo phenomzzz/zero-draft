@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opening frame | zero-draft motion</title>
+<script>if (/[?&]motion=reduce/.test(location.search)) document.documentElement.dataset.motion = 'reduce';</script>
+<style>
+  /* Fixture styling only: restyle with project tokens before judging fit. */
+  :root { --ground: #f3f2ef; --ink: #1c1c1e; --muted: #5d5d63; --line: #d6d3cc; --panel: #fff; --focus: #2457d6; --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 var(--sans); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+
+  .opening { position: relative; height: 190vh; }
+  .opening-stage { position: relative; height: 100vh; min-height: 560px; overflow: hidden; }
+  .hero-preface { position: absolute; z-index: 2; top: 28px; left: 5vw; right: 5vw; margin: 0; max-width: 58ch; color: var(--muted); font-size: 15px; }
+  .hero-title { margin: 0; font-size: clamp(56px, 9vw, 150px); line-height: .95; font-weight: 700; letter-spacing: -.03em; }
+  .hero-first, .hero-last { position: absolute; z-index: 2; display: block; overflow: clip; padding-bottom: .08em; }
+  .hero-first { left: 5vw; top: 16vh; }
+  .hero-last { right: 5vw; bottom: 14vh; }
+  .intro-inner { display: block; }
+  /* The slot is only a measuring box: the frame starts on it and grows from it. */
+  .hero-slot { position: absolute; left: 52%; top: 30%; width: 38%; height: 35%; border-radius: 999px; pointer-events: none; }
+  .hero-frame { position: absolute; z-index: 1; left: 52%; top: 30%; width: 38%; height: 35%; border-radius: 999px; overflow: hidden; background: #b9b4a7; }
+  .hero-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .hero-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 12, 10, .55), rgba(10, 12, 10, 0) 55%); opacity: 0; visibility: hidden; }
+  .frame-caption { position: absolute; z-index: 3; left: 5vw; bottom: 12%; margin: 0; color: #fff; font-size: clamp(40px, 5.6vw, 96px); line-height: .98; letter-spacing: -.03em; opacity: 0; visibility: hidden; }
+  .frame-caption .line { display: block; overflow: clip; padding-bottom: .14em; margin-bottom: -.06em; }
+  .frame-caption .line > span { display: block; }
+  .hero-meta { position: absolute; z-index: 2; left: 5vw; bottom: 5vh; margin: 0; display: flex; gap: 20px; align-items: center; color: var(--muted); }
+  .skip { padding: 8px 14px; border: 1px solid currentColor; border-radius: 999px; text-decoration: none; }
+
+  .after { max-width: 1200px; margin: 0 auto; padding: 20vh 24px 40vh; }
+  .after h2 { font-size: clamp(28px, 3.4vw, 48px); line-height: 1.1; margin: 0 0 16px; max-width: 20ch; }
+  .about { color: var(--muted); max-width: 64ch; margin: 0 0 8vh; }
+  .photos { display: grid; grid-template-columns: 5fr 4fr 3fr; gap: 3vw; align-items: start; }
+  .land-photo { margin: 0; }
+  .land-photo:nth-child(2) { margin-top: 18vh; }
+  .land-photo:nth-child(3) { margin-top: 6vh; }
+  .land-photo img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; background: #cfcac0; }
+  .land-photo figcaption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  @media (max-width: 760px) {
+    .hero-first { top: 14vh; } .hero-last { bottom: 22vh; }
+    .hero-slot, .hero-frame { left: 6vw; top: 37%; width: 88vw; height: 21svh; }
+    .frame-caption { font-size: clamp(34px, 10vw, 52px); left: 6vw; bottom: 20%; }
+    .photos { grid-template-columns: 1fr 1fr; } .land-photo:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="opening" aria-label="Opening">
+    <div class="opening-stage">
+      <p class="hero-preface">Opening frame, a recreated capsule-hero. <a href="index.html">All components</a></p>
+      <h1 class="hero-title"><span class="hero-first"><span class="intro-inner">Slow</span></span> <span class="hero-last"><span class="intro-inner">mornings</span></span></h1>
+      <div class="hero-slot" aria-hidden="true"></div>
+      <div class="hero-frame"><img src="https://picsum.photos/seed/zd-valley/1800/1100" alt="A valley at first light" width="1800" height="1100"><div class="hero-shade" aria-hidden="true"></div></div>
+      <p class="frame-caption"><span class="line"><span>Scroll opens</span></span><span class="line"><span>the frame.</span></span></p>
+      <p class="hero-meta"><span>Scroll to open</span><a class="skip" href="#after">Skip the opening</a></p>
+    </div>
+  </section>
+  <section class="after" id="after" tabindex="-1">
+    <h2>After the opening, three photos drift at different rates and uncover once.</h2>
+    <p class="about">The rounded window in the headline opens to the full screen as you scroll, while the words part around it and a caption rises over the photo; every size is a function value that ScrollTrigger re-measures on resize. Base component: capsule-hero (annnimate catalog), recreated from scratch. Values as tuned in the booking build.</p>
+    <div class="photos">
+      <figure class="land-photo"><img src="https://picsum.photos/seed/zd-land0/900/1200" alt="Placeholder landscape" loading="lazy"><figcaption>Rate .7</figcaption></figure>
+      <figure class="land-photo"><img src="https://picsum.photos/seed/zd-land1/900/1200" alt="Placeholder landscape" loading="lazy"><figcaption>Rate 1.05</figcaption></figure>
+      <figure class="land-photo"><img src="https://picsum.photos/seed/zd-land2/900/1200" alt="Placeholder landscape" loading="lazy"><figcaption>Rate .55</figcaption></figure>
+    </div>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
+<script>
+(() => {
+  gsap.registerPlugin(ScrollTrigger);
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = () => rmq.matches || document.documentElement.dataset.motion === 'reduce';
+
+  const CFG = {
+    scrub: .6,
+    openEnd: .55,          // 0 → .55: the window opens while the words part
+    captionAt: .44,        // the caption lines rise from here
+    hold: 1.035,           // a slow push-in on the photo for the rest of the pin
+    parallax: { distance: 95, rates: [.7, 1.05, .55] },
+    reveal: { from: 'inset(20% 0% 0% 0%)', duration: 1.2, ease: 'power3.out' }
+  };
+
+  const stage = $('.opening-stage'), frame = $('.hero-frame'), slot = $('.hero-slot');
+  let ctx = null, measured = null;
+  // The slot's box relative to the stage does not change with scroll or pinning, so one reading
+  // serves every function value of a refresh; it is cleared on refreshInit (resize).
+  const measure = () => measured ||= (() => { const r = slot.getBoundingClientRect(), p = stage.getBoundingClientRect(); return { x: r.left - p.left, y: r.top - p.top, w: r.width, h: r.height }; })();
+  ScrollTrigger.addEventListener('refreshInit', () => { measured = null; });
+  const slotBox = { left: () => measure().x, top: () => measure().y, width: () => measure().w, height: () => measure().h, borderRadius: () => measure().h / 2 };
+
+  function build() {
+    ctx?.revert();
+    gsap.set(frame, slotBox);
+    if (reduced()) { $('.opening').style.height = '100vh'; ScrollTrigger.refresh(); return; }
+    $('.opening').style.height = '190vh';
+    ctx = gsap.context(() => {
+      // Every geometry value is a function, so ScrollTrigger re-measures them on its own resize refresh.
+      gsap.timeline({ scrollTrigger: { trigger: '.opening', start: 'top top', end: 'bottom bottom', pin: stage, pinSpacing: false, scrub: CFG.scrub, invalidateOnRefresh: true,
+        onUpdate: s => { const gone = s.progress > .14; $('.hero-meta').inert = gone; } } })
+        .fromTo(frame, slotBox, { left: 0, top: 0, width: () => stage.clientWidth, height: () => stage.clientHeight, borderRadius: 0, duration: CFG.openEnd, ease: 'power2.inOut' }, 0)
+        .to('.hero-first', { xPercent: -70, yPercent: -55, autoAlpha: 0, duration: .42, ease: 'power2.in' }, 0)
+        .to('.hero-last', { xPercent: 50, yPercent: 60, autoAlpha: 0, duration: .42, ease: 'power2.in' }, 0)
+        .to('.hero-preface, .hero-meta', { autoAlpha: 0, duration: .2 }, 0)
+        .fromTo('.hero-frame img', { scale: 1.12 }, { scale: 1, duration: CFG.openEnd, ease: 'power2.inOut' }, 0)
+        .to('.hero-shade', { autoAlpha: 1, duration: .3 }, .38)
+        .fromTo('.frame-caption .line > span', { yPercent: 110 }, { yPercent: 0, duration: .3, stagger: .06, ease: 'power3.out' }, CFG.captionAt)
+        .to('.frame-caption', { autoAlpha: 1, duration: .05 }, CFG.captionAt)
+        .to('.hero-frame img', { scale: CFG.hold, duration: .45, ease: 'none' }, CFG.openEnd);
+      $$('.land-photo').forEach((f, i) => {
+        const d = CFG.parallax.distance * CFG.parallax.rates[i];
+        gsap.fromTo(f, { y: d }, { y: -d, ease: 'none', scrollTrigger: { trigger: '.photos', start: 'top bottom', end: 'bottom top', scrub: true } });
+        gsap.fromTo($('img', f), { clipPath: CFG.reveal.from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: CFG.reveal.duration, ease: CFG.reveal.ease, scrollTrigger: { trigger: f, start: 'top 90%', once: true } });
+      });
+    });
+    ScrollTrigger.refresh();
+  }
+
+  /* First-view entrance: the window scales up and the words rise into place. Skipped when the page
+     was opened scrolled down or with reduced motion. */
+  function entrance() {
+    if (reduced() || scrollY > 40) return;
+    frame.style.willChange = 'transform';
+    gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: () => { frame.style.willChange = ''; } })
+      .from(frame, { scale: .82, duration: 1.4 }, 0)
+      .from('.intro-inner', { yPercent: 80, autoAlpha: 0, duration: 1.2, stagger: .12 }, .1)
+      .from('.hero-preface, .hero-meta > *', { y: 16, autoAlpha: 0, duration: .9, stagger: .05 }, .45);
+  }
+
+  rmq.addEventListener('change', build);
+  addEventListener('resize', () => { if (reduced()) { measured = null; gsap.set(frame, slotBox); } });
+  build();
+  document.fonts.ready.then(() => { requestAnimationFrame(() => requestAnimationFrame(() => ScrollTrigger.refresh())); entrance(); });
+})();
+</script>
+</body>
+</html>
