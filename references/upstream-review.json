@@ -1,0 +1,129 @@
+{
+  "reviewed_at": "2026-10-15T10:29:46.697524+00:00",
+  "method": "Read-only source retrieval and manual instruction review; no upstream executables installed or run",
+  "scope": "Selected SKILL.md entrypoints and listed supporting material; not a repository-wide security certification",
+  "repositories": [
+    {
+      "repository": "jakubkrehel/skills",
+      "commit": "4c66b1fa86e9ab70187b43d7da9b6fdb29f2ef63",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "ed1dfe988fc40511b4845ccd9050a143a2002fee3bedc8064c47fa342b5d8d4f",
+          "bytes": 1069
+        },
+        {
+          "path": "skills/better-interface/SKILL.md",
+          "sha256": "23416fef4d08e0417927b6eb6763b7b08ed832451abfb9e26ea699262a28abcb",
+          "bytes": 8871
+        },
+        {
+          "path": "skills/better-layout/SKILL.md",
+          "sha256": "8c5883ccb23c27c39b7c58d101154ff35e032410e0dc4794be9ab7fe070c2297",
+          "bytes": 8420
+        },
+        {
+          "path": "skills/better-typography/SKILL.md",
+          "sha256": "e60ca6467ba60e68f95ed2d2cfa35f2a850d96ef2a0c0d3fcfcfd9510e51f184",
+          "bytes": 12260
+        },
+        {
+          "path": "skills/better-colors/SKILL.md",
+          "sha256": "e74f1c413a4094dc2a73fb0baa0da2241465e01d593b0257ba995500df9b0068",
+          "bytes": 7692
+        },
+        {
+          "path": "skills/better-accessibility/SKILL.md",
+          "sha256": "df0cafe0e75a08548cf46a2a430f46c198e7e0ee9d46bdf7884c2afefb44b70e",
+          "bytes": 11068
+        },
+        {
+          "path": "skills/better-writing/SKILL.md",
+          "sha256": "ef6843cbfcbafa62614b1a6e012c0b1ab6fd33eee0bdd84123cf49fe275c3a31",
+          "bytes": 9420
+        },
+        {
+          "path": "skills/better-ui/SKILL.md",
+          "sha256": "fb9807bb5c59a3ca9d4a27b25f56b36e5596251d280fb30c4b7f2ff8b6f4fe2d",
+          "bytes": 11140
+        },
+        {
+          "path": "skills/variant/SKILL.md",
+          "sha256": "2d8eef43768e01d7fcec5ec2fd56dcfc453904b31a23fe8ea53170eb828d24ea",
+          "bytes": 6825
+        },
+        {
+          "path": "skills/state-machine/SKILL.md",
+          "sha256": "30b72100000bc8039a81fd4150919430d6ba5bcff5b4e86de11e7490afa54010",
+          "bytes": 6319
+        },
+        {
+          "path": "skills/break/SKILL.md",
+          "sha256": "6b231897f10477fe2a9d335b457e53c670b07a8291a08b5d8dad3981b658b9d0",
+          "bytes": 6145
+        },
+        {
+          "path": "skills/interface-review/SKILL.md",
+          "sha256": "8977988d63d7c17b8b0cd334ebd722d4e2dff00af0f152de2bc6f100d13d59ce",
+          "bytes": 10159
+        },
+        {
+          "path": "skills/explain-interface/SKILL.md",
+          "sha256": "6795aff9a133b94c6398a95b5c8958a2eaccade5db18f58e752bc02460a356e0",
+          "bytes": 8495
+        }
+      ]
+    },
+    {
+      "repository": "emilkowalski/skills",
+      "commit": "2d228630ba1446365f614a108cb8252f1feda202",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b",
+          "bytes": 1070
+        },
+        {
+          "path": "skills/emil-design-eng/SKILL.md",
+          "sha256": "ffbe68e6007fb42cb8149f089b400a1ca007d59ba23e8948e2be4476f3175939",
+          "bytes": 27123
+        },
+        {
+          "path": "skills/prototype/SKILL.md",
+          "sha256": "bba39c955eb1871c5a02733976ceec5d0324198e0812e667604756489c89f7b9",
+          "bytes": 7830
+        },
+        {
+          "path": "skills/improve-animations/SKILL.md",
+          "sha256": "73962447464433476343e2c12cd08ab39cc99a9e5f3c118c5fb54ed897574ef6",
+          "bytes": 8208
+        },
+        {
+          "path": "skills/animation-performance/SKILL.md",
+          "sha256": "ceb9dd3fe912615830f725a0120ccf8d012d15a6218001a5cd6c15d38e39a957",
+          "bytes": 13966
+        },
+        {
+          "path": "skills/pick-ui-library/SKILL.md",
+          "sha256": "675fdce308683256ed617351a9b74d23457a5fbd0a562d9831b9c764b8c5e682",
+          "bytes": 4790
+        },
+        {
+          "path": "skills/find-animation-opportunities/SKILL.md",
+          "sha256": "d52a377819b84a71930f0c822cfe2849f40301605a2d5c7eccbfa3b257700df2",
+          "bytes": 9808
+        },
+        {
+          "path": "skills/review-animations/SKILL.md",
+          "sha256": "6ff590d29e436766135aa3d137be1fac2a867165c7257fc315b189361f1873af",
+          "bytes": 8407
+        },
+        {
+          "path": "skills/improve-animations/PLAN-TEMPLATE.md",
+          "sha256": "0a08ac8e23fd2082d7ffb86aeed7b789de77328c3cf874b16f1a755f2ef0a6ad",
+          "bytes": 3100
+        }
+      ]
+    }
+  ]
+}

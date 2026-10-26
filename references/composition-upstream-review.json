@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-15",
+  "scope": "Selected instruction concepts adapted and rewritten; no executable installed or run.",
+  "sources": [
+    {
+      "repo": "pbakaus/impeccable",
+      "commit": "db0f2dfb47f12f7ff02ec98a81de1933ad22b8a4",
+      "files": [
+        {
+          "path": ".agents/skills/impeccable/reference/layout.md",
+          "sha256": "0bc7d7971b3edf2acd0580e847458dc6d84129d90715b452799ace3bed815c7c",
+          "url": "https://github.com/pbakaus/impeccable/blob/db0f2dfb47f12f7ff02ec98a81de1933ad22b8a4/.agents/skills/impeccable/reference/layout.md"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "02bb8c3b4e70190e3986c0404ad2fd8d639b4f534252d82379cc1b502b6d1812",
+          "url": "https://github.com/pbakaus/impeccable/blob/db0f2dfb47f12f7ff02ec98a81de1933ad22b8a4/LICENSE"
+        },
+        {
+          "path": "NOTICE.md",
+          "sha256": "c60a093c2845fd9fb82f9c6f742ece31f379f8190b535309d32d66c45ccffdcb",
+          "url": "https://github.com/pbakaus/impeccable/blob/db0f2dfb47f12f7ff02ec98a81de1933ad22b8a4/NOTICE.md"
+        }
+      ]
+    },
+    {
+      "repo": "anthropics/skills",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "files": [
+        {
+          "path": "skills/frontend-design/SKILL.md",
+          "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+          "url": "https://github.com/anthropics/skills/blob/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design/SKILL.md"
+        },
+        {
+          "path": "skills/frontend-design/LICENSE.txt",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "url": "https://github.com/anthropics/skills/blob/dbd4588f9e1033efb41dad4bef2f7947c8993d44/skills/frontend-design/LICENSE.txt"
+        },
+        {
+          "path": "THIRD_PARTY_NOTICES.md",
+          "sha256": "a8ff7a84dee9dfb42ab448de281784387ceafdf63881b7c070ee2de7f6ed865c",
+          "url": "https://github.com/anthropics/skills/blob/dbd4588f9e1033efb41dad4bef2f7947c8993d44/THIRD_PARTY_NOTICES.md"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Zero Draft"
+  short_description: "Build distinctive websites with dependable UX"
+  default_prompt: "Use $zero-draft to design and build a distinctive website with clear UX, purposeful motion, and verified responsive behavior."

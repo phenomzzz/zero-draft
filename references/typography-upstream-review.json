@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-15T12:33:19.678400+00:00",
+  "scope": "Selected typography methods, metadata and licenses; read-only retrieval, no upstream executable run",
+  "repositories": [
+    {
+      "repository": "wondelai/skills",
+      "commit": "c172996495bed0fcd26896a9416b2093fd7073f0",
+      "files": [
+        {
+          "path": "web-typography/SKILL.md",
+          "sha256": "53fa4e5ef426bced13c56ca13d9e47151d89033f934318dc34f7a8eeb44ce75b"
+        },
+        {
+          "path": "web-typography/references/pairing-strategies.md",
+          "sha256": "f90c1992b3cdf0e2fe2b864a277d0374b1b43c6de573f6809ad8b2fd098c0798"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "87c3c90f9e673a76b8ca81049b8fe30996b910a7a80140c3ed57a2ee922d2579"
+        }
+      ]
+    },
+    {
+      "repository": "jakubkrehel/skills",
+      "commit": "4c66b1fa86e9ab70187b43d7da9b6fdb29f2ef63",
+      "files": [
+        {
+          "path": "skills/better-typography/SKILL.md",
+          "sha256": "e60ca6467ba60e68f95ed2d2cfa35f2a850d96ef2a0c0d3fcfcfd9510e51f184"
+        },
+        {
+          "path": "skills/better-typography/choosing-fonts.md",
+          "sha256": "abd2c084ce7f9c3908dbfa09636ab87a2db731204c1e804b081e4fbd7e4d612d"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "ed1dfe988fc40511b4845ccd9050a143a2002fee3bedc8064c47fa342b5d8d4f"
+        }
+      ]
+    },
+    {
+      "repository": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "commit": "56ea9cf174ed86786187daa9de0e6247cb0747e4",
+      "files": [
+        {
+          "path": "src/ui-ux-pro-max/data/typography.csv",
+          "sha256": "321fc446e89024488ebae96dda93efc4d2307bd8bddb240857ad51364f6782c8"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014"
+        }
+      ]
+    }
+  ]
+}

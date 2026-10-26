@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site-dev",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:/path/to/site && npm run dev"],
+      "port": 5173
+    },
+    {
+      "name": "site-static",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "python -I -m http.server 8080 --bind 127.0.0.1 --directory C:/path/to/site"],
+      "port": 8080
+    },
+    {
+      "name": "site-serve",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:/path/to/site && npx --no serve -l 3000"],
+      "port": 3000
+    },
+    {
+      "name": "packet-workbench",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "python -I -m http.server 8141 --bind 127.0.0.1 --directory C:/path/to/packet"],
+      "port": 8141
+    }
+  ]
+}

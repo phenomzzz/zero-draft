@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Workbench test fixture</title>
+<style>
+  :root { font: 100%/1.6 system-ui,sans-serif; color: #202630; background: #fff; }
+  * { box-sizing: border-box; } body { margin: 0; padding: clamp(1rem, 5vw, 3rem); }
+  main { max-width: 65ch; margin-inline: auto; } h1 { line-height: 1.2; font-size: clamp(1.5rem, 5vw, 2.5rem); }
+  fieldset { display: grid; gap: 1rem; border: 1px solid #9ca8b4; padding: 1rem; }
+  label { display: flex; align-items: start; gap: .75rem; padding: .75rem; border: 1px solid #9ca8b4; overflow-wrap: anywhere; }
+  label:has(input:checked) { background: #e7edf7; border: 2px solid #254fa3; padding: calc(.75rem - 1px); }
+  input { margin-top: .45rem; flex: 0 0 auto; } button { font: inherit; padding: .75rem 1rem; min-height: 44px; margin-block: 1rem; }
+  :focus-visible { outline: 3px solid #254fa3; outline-offset: 3px; }
+</style></head>
+<body><main><p>Functional fixture</p><h1>Inspect a real component in context.</h1><p>This small demo tests the workbench selector and size controls. Replace its routes with your project previews.</p>
+<fieldset><legend>Choose one example</legend><label><input type="radio" name="choice" value="Landscape" checked><span id="first">Landscape-led direction</span></label>
+<label><input type="radio" name="choice" value="Information"><span>Information-led direction</span></label></fieldset>
+<button id="continue" type="button">Continue with this choice</button><p id="result" role="status"></p>
+<script>
+  if (new URL(location.href).searchParams.has('long')) document.getElementById('first').textContent = 'A longer realistic direction label to inspect wrapping and selection when space is constrained';
+  document.getElementById('continue').addEventListener('click', () => { document.getElementById('result').textContent = `Current choice: ${document.querySelector('input:checked').value}`; });
+</script></main></body></html>

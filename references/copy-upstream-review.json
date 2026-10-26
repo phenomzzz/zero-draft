@@ -1,0 +1,84 @@
+{
+  "reviewed": "2026-10-15",
+  "scope": "Instruction review only; no upstream executables run. Evaluation reports are author-reported, not independently reproduced.",
+  "sources": [
+    {
+      "repository": "blader/humanizer",
+      "commit": "225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "0612f1dfb1672b0ea9b97e139bf1f06cabe98d8b27424fe8ff01e1fb4cc99cad",
+          "url": "https://github.com/blader/humanizer/blob/225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8/SKILL.md"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+          "url": "https://github.com/blader/humanizer/blob/225a6f39ac85f76ee48dbad772ea4abe4ed6c9d8/LICENSE"
+        }
+      ]
+    },
+    {
+      "repository": "adewale/anti-slop-writing",
+      "commit": "00b0809cdd5335d54ae61ee1459d78c95db4c61b",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "skills/anti-slop-writing/SKILL.md",
+          "sha256": "1da80fc7bad725d1824a4e59e155a227c8d5da57e659e20c0ed80e5baa18d6f9",
+          "url": "https://github.com/adewale/anti-slop-writing/blob/00b0809cdd5335d54ae61ee1459d78c95db4c61b/skills/anti-slop-writing/SKILL.md"
+        },
+        {
+          "path": "evals/results/latest.md",
+          "sha256": "35ab68bd403d696f41f2e2626a54ebe68e7868b2b0564eed43235ecc83c3f64b",
+          "url": "https://github.com/adewale/anti-slop-writing/blob/00b0809cdd5335d54ae61ee1459d78c95db4c61b/evals/results/latest.md"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "459d26818c3474a1c6efbe1bb77063633515c422edcca29c0c4ff125a2f9eb64",
+          "url": "https://github.com/adewale/anti-slop-writing/blob/00b0809cdd5335d54ae61ee1459d78c95db4c61b/LICENSE"
+        }
+      ]
+    },
+    {
+      "repository": "fabricioctelles/skills",
+      "commit": "075e96fb1b467b3b42dcfa2c1522252da26342e0",
+      "license": "Apache-2.0",
+      "files": [
+        {
+          "path": "plugins/deslop-writing/skills/humanizar/SKILL.md",
+          "sha256": "f84777d64b19048c563f75df9781677f8660177f0b29e3154c39fc6f16837aeb",
+          "url": "https://github.com/fabricioctelles/skills/blob/075e96fb1b467b3b42dcfa2c1522252da26342e0/plugins/deslop-writing/skills/humanizar/SKILL.md"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "aa41faffcf88908b495d7d318e96e889ff78aa53138e51e48c4ef4e6da076ad8",
+          "url": "https://github.com/fabricioctelles/skills/blob/075e96fb1b467b3b42dcfa2c1522252da26342e0/LICENSE"
+        }
+      ]
+    },
+    {
+      "repository": "ViniciusStanula/Zero-Lero",
+      "commit": "790d5bb8abbed856be51064237c0fde47ab69ca9",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "201ad59369dc97b53d738cfffe0a0e3ff82c265bb8bf505612da8e308021d420",
+          "url": "https://github.com/ViniciusStanula/Zero-Lero/blob/790d5bb8abbed856be51064237c0fde47ab69ca9/SKILL.md"
+        },
+        {
+          "path": "docs/achados-corpus-humano.md",
+          "sha256": "a30cf366185d7de957608b0a42b6e9e6c0216fb3e02a8197223368509c6aac33",
+          "url": "https://github.com/ViniciusStanula/Zero-Lero/blob/790d5bb8abbed856be51064237c0fde47ab69ca9/docs/achados-corpus-humano.md"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "882a3c0b61794e02c4dc79046c24acfb70c5ce75b631acb2d2c65f278fae6a13",
+          "url": "https://github.com/ViniciusStanula/Zero-Lero/blob/790d5bb8abbed856be51064237c0fde47ab69ca9/LICENSE"
+        }
+      ]
+    }
+  ]
+}
